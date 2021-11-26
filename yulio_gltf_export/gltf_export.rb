@@ -61,9 +61,26 @@ module Yulio
 					Dir.mkdir(dst_dir)
 				end
 
-				$dst_file_path = File.join(dst_dir, filename)
+				$dst_file_path = File.join(dst_dir, 'main.gltf')
 
-				GltfExport.new.export(false, false, $dst_file_path) 
+				GltfExport.new.export(false, false, $dst_file_path)
+
+				if  File.exist?($dst_file_path)
+					zip_file_path = $dst_file_path.gsub('.gltf', '.zip')
+
+					zip_tool_path = File.join(Dir.pwd, 'tools', '7z.exe')
+					if File.exist?(zip_tool_path)
+						zipcmd = zip_tool_path + ' a ' + zip_file_path + ' ' + $dst_file_path
+
+						system(zipcmd)
+
+						system('explorer.exe ' + dst_dir)						
+					else
+						UI.messagebox 'can not find zip tool.' + zip_tool_path, MB_OK
+					end
+				else
+					UI.messagebox 'can not find dst gltf file.', MB_OK
+				end
 			}
 
 			main_menu.add_item(TRANSLATE['menuGlb']) {
@@ -330,7 +347,6 @@ module Yulio
 						UI.messagebox(summary, MB_MULTILINE, TRANSLATE["title"])
 					end
 					return summary
-					
 				rescue => e
 					# something went wrong, log the error so the user can give feedback to me
 					#puts e.backtrace
@@ -340,7 +356,6 @@ module Yulio
 						UI.messagebox(msg, MB_MULTILINE, TRANSLATE["title"])
 					end
 					return msg
-
 				end
 			end
 
