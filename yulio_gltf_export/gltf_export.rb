@@ -45,12 +45,30 @@ module Yulio
 	module GltfExporter
 		#extend self
 		
+		$dst_file_path = ''
 		
 		# add item if menu is not already loaded
 		unless file_loaded?(__FILE__)
 			main_menu = UI.menu("Plugins").add_submenu(TRANSLATE['menuMain'])
-			main_menu.add_item(TRANSLATE['menuGltf']) { GltfExport.new.export(false,false,"") }
-			main_menu.add_item(TRANSLATE['menuGlb']) { GltfExport.new.export(true,false,"") }
+
+			main_menu.add_item(TRANSLATE['menuGltf']) {
+				time = Time.new
+				tmp_dir_name = time.strftime("%y%m%d%H%M%S")
+
+				sys_tmp_dir = Dir.tmpdir()				
+				dst_dir = File.join(sys_tmp_dir, tmp_dir_name)
+				if not Dir.exist?(dst_dir)
+					Dir.mkdir(dst_dir)
+				end
+
+				$dst_file_path = File.join(dst_dir, filename)
+
+				GltfExport.new.export(false, false, $dst_file_path) 
+			}
+
+			main_menu.add_item(TRANSLATE['menuGlb']) {
+				GltfExport.new.export(true,false,"")
+			}
 			#main_menu.add_item(TRANSLATE['menuGlb']) { GltfExport.new.exportRecursive("C:\\sketchupStuff") }
 			#main_menu.add_item("glTF /w matrix") { GltfExport.new.exportWithMatrix(false,false,"") }
 			#main_menu.add_item("glb /w matrix") { GltfExport.new.exportWithMatrix(true,false,"") }
